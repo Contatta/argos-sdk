@@ -133,6 +133,18 @@ define('argos/Store/SData', [
             if (include && include.length > 0)
                 request.setQueryArg('include', include.join(','));
 
+	        /**
+	         * Check if there are additional query arguments defined in store
+	         *
+	         * Given that I needed a way of adding additional query parameters to the request query string
+	         * the following was added (mario)
+	         */
+	        if( this.queryArgs ){
+		        for( var arg in this.queryArgs ){
+			        request.setQueryArg(arg, this.queryArgs[arg]);
+		        }
+	        }
+
             return request;
         },
         _createFeedRequest: function(query, queryOptions) {
