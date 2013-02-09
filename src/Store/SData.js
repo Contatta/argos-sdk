@@ -239,6 +239,18 @@ define('argos/Store/SData', [
             if (typeof queryOptions.count !== 'undefined')
                 request.setQueryArg(Sage.SData.Client.SDataUri.QueryArgNames.Count, queryOptions.count);
 
+	        /**
+	         * Check if there are additional query arguments defined in store
+	         *
+	         * Given that I needed a way of adding additional query parameters to the request query string
+	         * the following was added (mario)
+	         */
+	        if( this.queryArgs ){
+		        for( var arg in this.queryArgs ){
+			        request.setQueryArg(arg, this.queryArgs[arg]);
+		        }
+	        }
+
             return request;
         },
         _onRequestFeedSuccess: function(queryDeferred, feed) {
