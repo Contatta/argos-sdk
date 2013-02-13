@@ -1555,7 +1555,12 @@
         executeServiceOperation: function(request, entry, options) {
              var o = S.apply({}, {
                 success: function(feed) {
-                    var entry = feed['$resources'][0] || false,
+	                /**
+	                 * Added feed validation to avoid JS errors and execution stop when the service
+	                 * request doesn't returns anything in the response. Which is now happening when
+	                 * invoking the mail/messages(id)/$service/markAsRead service.
+	                 */
+                    var entry = (feed && feed['$resources'][0]) || false,
                         response = entry && entry['response'],
                         resources = response && response['$resources'],
                         payload = resources && resources[0];
