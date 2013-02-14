@@ -1434,7 +1434,12 @@
             
             var o = S.apply({}, {
                 success: function(feed) {
-                    var entry = feed['$resources'][0] || false;
+	                /**
+	                 * Added feed validation to avoid JS errors and execution stop when the service
+	                 * request doesn't returns anything in the response. Which is now happening when
+	                 * invoking the mail/outgoing resource.
+	                 */
+                    var entry = (feed && feed['$resources'][0]) || false;
 
                     if (options.success)
                         options.success.call(options.scope || this, entry);
