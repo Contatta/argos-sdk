@@ -329,7 +329,7 @@ define('argos/Application', [
             }
         },
         /**
-         * Optional creates, then registers an Sage.SData.Client.SDataService and adds the result to `App.services`.
+         * Optional creates, then registers an data service and adds the result to `application()._connections`.
          * @param {String} name Unique identifier for the service.
          * @param {Object} definition May be a SDataService instance or constructor parameters to create a new SDataService instance.
          * @param {Object} options Optional settings for the registered service.
@@ -337,9 +337,18 @@ define('argos/Application', [
         registerConnection: function(name, definition, options) {
             options = options || {};
 
-            var instance = definition instanceof Sage.SData.Client.SDataService
-                ? definition
-                : new Sage.SData.Client.SDataService(definition);
+            var instance;
+
+            if (definition.type)
+            {
+                instance = new definition.type(definition);
+            }
+            else
+            {
+                instance = definition instanceof Sage.SData.Client.SDataService
+                    ? definition
+                    : new Sage.SData.Client.SDataService(definition)
+            }
 
             this._connections[name] = instance;
 

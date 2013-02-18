@@ -30,6 +30,66 @@ define('argos/utility', [
     var nameToPathCache = {};
 
     return lang.setObject('argos.utility', {
+
+        deepMixin: function(destination) {
+            var override = true,
+                len = arguments.length - 1;
+
+            if (typeof(arguments[len]) === 'boolean')
+            {
+                override = arguments[len];
+                len = len - 1;
+            }
+
+            for (var i = 0; i < len; i++)
+            {
+                var from = arguments[i+1]; // offset as first is destination
+                if (from === null) continue;
+
+                Object.getOwnPropertyNames(from).forEach(function(name) {
+                    var destinationType = typeof(destination[name]),
+                        fromType = typeof(from[name]);
+
+                    if ((destinationType === 'object' || destinationType === 'undefined') && fromType === 'object' )
+                    {
+                        if (destinationType === 'undefined')
+                        {
+                            destination[name] = Array.isArray(from[name]) ? [] : {};
+                        }
+
+                        if (override)
+                        {
+                            var isDestinationArray = Array.isArray(destination[name]),
+                                isFromArray = Array.isArray(from[name]);
+
+                            if (!isDestinationArray && isFromArray)
+                            {
+                                destination[name] = [];
+                            }
+                            else if (isDestinationArray && !isFromArray)
+                            {
+                                destination[name] = {};
+                            }
+                        }
+
+                        argos.utility.deepMixin(destination[name], from[name], override);
+                    }
+                    else if ((name in destination && override) || !(name in destination))
+                    {
+                        var descriptor = Object.getOwnPropertyDescriptor(from, name);
+                        if (descriptor.configurable)
+                        {
+                            Object.defineProperty(destination, name, descriptor);
+                        }
+                    }
+
+
+                });
+            }
+
+            return destination;
+        },
+
         /**
          * Takes an javascript dot-notated string path and converts it into a reversed array separate parts:
          *

@@ -9,6 +9,46 @@ define([
 ) {
     doh.register('argos-tests.src.utility', [
         {
+            name: 'Can deep mixin objects',
+            runTest: function() {
+                var foo = { bar: { price: '$250' } };
+                var lorem = { bar: { quantity: 50 } };
+
+                var expected = {
+                    bar: {
+                        price: '$250',
+                        quantity: 50
+                    }
+                };
+
+                doh.assertEqual(expected, utility.deepMixin(foo, lorem));
+            }
+        },
+        {
+            name: 'Can mixin arrays',
+            runTest: function() {
+                var foo = [];
+                var lorem = [1, 2, 3];
+
+                var expected = [1, 2, 3];
+
+                doh.assertEqual(expected, utility.deepMixin(foo, lorem));
+            }
+        },
+        {
+            name: 'Can mixin objects, without overriding existing values',
+            runTest: function() {
+                var foo = { bar: '50' };
+                var lorem = { bar: '100' };
+
+                var expected = {
+                    bar: '50'
+                };
+
+                doh.assertEqual(expected, utility.deepMixin(foo, lorem, false));
+            }
+        },
+        {
             name:'Can get single level property of object',
             runTest:function () {
 
