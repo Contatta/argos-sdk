@@ -59,15 +59,11 @@ define('argos/OData/Connection', [
             this.batchScope = null;
         },
         createBasicAuthToken: function() {
-            var word = digests.stringToWord(this.userName + ':' + this.password);
-            return 'Basic ' + digests.wordToBase64(word);
+            return 'Basic ' + Base64.encode(this.userName + ':' + this.password);
         },
         createHeadersForRequest: function() {
             var headers = {
-                'X-Authorization-Mode': 'no-challenge',
-                'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-                'Accept-Encoding': 'gzip,deflate,sdch',
-                'Accept-Language': 'en-US,en;q=0.8'
+                'X-Authorization-Mode': 'no-challenge'
             };
 
             if (this.userName && !this.useCredentialedRequest)
@@ -127,7 +123,7 @@ define('argos/OData/Connection', [
 
             if (o.etag)
                 o.headers['If-Match'] = o.etag;
-console.log('******REQUEST OPTIONS....', o);
+
             request.get(o.url, o).then(
                 lang.hitch(this, onSuccess),
                 lang.hitch(this, onFailure),
@@ -137,12 +133,9 @@ console.log('******REQUEST OPTIONS....', o);
         processResponse: function(response) {
             console.log(response);
             if (this.json)
-                return this.processJson(response);
+                return response.d;
             else
                 return this.processXml(response);
-        },
-        processJson: function(response) {
-            return JSON.parse(response);
         },
         processXml: function(response) {
             // todo: parse xml
