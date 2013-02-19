@@ -2,6 +2,8 @@
  * OData is an extension of dojo.store that is tailored to handling OData parameters, requests,
  * and pre-handling the responses.
  * @alternateClassName OData
+ * @requires ODataCollectionRequest
+ * @requires ODataEntryRequest
  * @requires convert
  * @requires utility
  */
@@ -14,6 +16,7 @@ define('argos/Store/OData', [
     'dojo/string',
     'dojo/_base/json',
     '../OData/CollectionRequest',
+    '../OData/EntryRequest',
     '../convert',
     '../utility'
 ], function (
@@ -25,6 +28,7 @@ define('argos/Store/OData', [
     string,
     json,
     CollectionRequest,
+    EntryRequest,
     convert,
     utility
 ) {
@@ -37,7 +41,7 @@ define('argos/Store/OData', [
         where: null,
         select: null,
         include: null,
-        orderBy: null,
+        orderby: null,
         service: null,
         request: null,
         queryName: null,
@@ -51,11 +55,12 @@ define('argos/Store/OData', [
         applicationName: null,
         executeQueryAs: null,
         executeGetAs: null,
+        pathSegments: null,
 
         itemsProperty: 'results',
         idProperty: 'id',
-        entityProperty: 'type',
-        versionProperty: 'etag',
+        entityProperty: '__metadata.type',
+        versionProperty: '__metadata.etag',
 
         constructor: function(props) {
             lang.mixin(this, props);
@@ -70,37 +75,42 @@ define('argos/Store/OData', [
             {
                 id = id || utility.expand(this.scope || this, getOptions.resourcePredicate || this.resourcePredicate);
 
-                var contractName = utility.expand(this.scope || this, getOptions.contractName || this.contractName),
-                    dataSet = utility.expand(this.scope || this, getOptions.dataSet || this.dataSet),
-                    resourceKind = utility.expand(this.scope || this, getOptions.resourceKind || this.resourceKind),
+                var resourceKind = utility.expand(this.scope || this, getOptions.resourceKind || this.resourceKind),
                     resourceProperty = utility.expand(this.scope || this, getOptions.resourceProperty || this.resourceProperty),
-                    resourcePredicate = /\s+/.test(id) ? id : (id) ? string.substitute("'${0}'", [id]) : null;
+                    resourcePredicate = /\s+/.test(id) ? id : (id) ? string.substitute("id=${0}", [id]) : null,
+                    queryArgs = utility.expand(this.scope || this, getOptions.queryArgs || this.queryArgs),
+                    pathSegments = utility.expand(this.scope || this, getOptions.pathSegments || this.pathSegments);
 
                 if (resourceProperty)
                 {
-                    request = new Sage.SData.Client.SDataResourcePropertyRequest(this.service)
-                        .setResourceProperty(resourceProperty)
-                        .setResourceSelector(resourcePredicate);
+                    //todo implement
                 }
                 else
                 {
-                    request = new Sage.SData.Client.SDataSingleResourceRequest(this.service)
-                        .setResourceSelector(resourcePredicate);
+                    request = new EntryRequest(this.service);
+                    request.uri.setResourceSelector(resourcePredicate);
                 }
 
-                if (contractName) request.setContractName(contractName);
-                if (dataSet) request.setDataSet(dataSet);
-                if (resourceKind) request.setResourceKind(resourceKind);
+                if (resourceKind)
+                    request.uri.setResourceKind(resourceKind);
+
+                if (queryArgs)
+                    for (var arg in queryArgs)
+                        request.uri.setQueryOption(arg, queryArgs[arg]);
+
+                if (pathSegments)
+                    for (var i = 0; i < pathSegments.length; i++)
+                        request.uri.appendPathSegment(pathSegments[i]);
             }
 
             var select = utility.expand(this.scope || this, getOptions.select || this.select),
-                include = utility.expand(this.scope || this, getOptions.include || this.include);
+                expand = utility.expand(this.scope || this, getOptions.expand || this.expand);
 
             if (select && select.length > 0)
-                request.setQueryOption('select', select.join(','));
+                request.uri.setQueryOption('$select', select.join(','));
 
-            if (include && include.length > 0)
-                request.setQueryOption('include', include.join(','));
+            if (expand && expand.length > 0)
+                request.uri.setQueryOption('$expand', expand.join(','));
 
             return request;
         },
@@ -116,7 +126,9 @@ define('argos/Store/OData', [
                     resourceKind = utility.expand(this.scope || this, queryOptions.resourceKind || this.resourceKind),
                     resourceProperty = utility.expand(this.scope || this, queryOptions.resourceProperty || this.resourceProperty),
                     resourcePredicate = utility.expand(this.scope || this, queryOptions.resourcePredicate || this.resourcePredicate),
-                    queryArgs = utility.expand(this.scope || this, queryOptions.queryArgs || this.queryArgs);
+                    queryArgs = utility.expand(this.scope || this, queryOptions.queryArgs || this.queryArgs),
+                    pathSegments = utility.expand(this.scope || this, queryOptions.pathSegments || this.pathSegments);
+
 
                 if (queryName)
                 {
@@ -131,33 +143,42 @@ define('argos/Store/OData', [
                     request = new CollectionRequest(this.service);
                 }
 
-console.log(request);
-                if (resourceKind) request.uri.setResourceKind(resourceKind);
+                if (resourceKind)
+                    request.uri.setResourceKind(resourceKind);
                 if (queryArgs)
-                    for (var arg in queryArgs) request.uri.setQueryOption(arg, queryArgs[arg]);
+                    for (var arg in queryArgs)
+                        request.uri.setQueryOption(arg, queryArgs[arg]);
+                if (pathSegments)
+                    for (var i = 0; i < pathSegments.length; i++)
+                        request.uri.appendPathSegment(pathSegments[i]);
             }
 
             var select = utility.expand(this.scope || this, queryOptions.select || this.select),
                 include = utility.expand(this.scope || this, queryOptions.include || this.include),
-                orderBy = utility.expand(this.scope || this, queryOptions.sort || this.orderBy);
+                orderby = utility.expand(this.scope || this, queryOptions.sort || this.orderby);
 
             var requestUri = request.uri;
 
             if (select && select.length > 0)
+            {
+                if (array.indexOf(select, 'id') === -1)
+                    select.push('id');
+
                 requestUri.setQueryOption('$select', select.join(','));
+            }
 
             if (include && include.length > 0)
                 requestUri.setQueryOption('$expand', include.join(','));
 
-            if (orderBy)
+            if (orderby)
             {
-                if (typeof orderBy === 'string')
+                if (typeof orderby === 'string')
                 {
-                    requestUri.setQueryOption('$orderby', orderBy);
+                    requestUri.setQueryOption('$orderby', orderby);
                 }
-                else if (orderBy.length > 0)
+                else if (orderby.length > 0)
                 {
-                    requestUri.setQueryOption('$orderby', orderBy.join(','));
+                    requestUri.setQueryOption('$orderby', orderby.join(','));
                 }
             }
 
@@ -174,23 +195,21 @@ console.log(request);
             if (conditions.length > 0)
                 requestUri.setQueryOption('$filter', '(' + conditions.join(') and (') + ')');
 
-            /*
-            if (typeof queryOptions.start !== 'undefined')
-                request.setQueryOption(Sage.SData.Client.SDataUri.QueryArgNames.StartIndex, queryOptions.start + 1);
-
             if (typeof queryOptions.count !== 'undefined')
-                request.setQueryOption(Sage.SData.Client.SDataUri.QueryArgNames.Count, queryOptions.count);
-            */
+                requestUri.setQueryOption('$top', queryOptions.count);
+
+            if (typeof queryOptions.start !== 'undefined' && queryOptions.start > 0)
+                requestUri.setQueryOption('$skip', queryOptions.start);
+
             requestUri.setQueryOption('$inlinecount', 'allpages');
 
             return request;
         },
         _onRequestFeedSuccess: function(queryDeferred, feed) {
-            console.log('**** FEED SUCCESS ****', arguments);
             if (feed)
             {
                 var items = lang.getObject(this.itemsProperty, false, feed),
-                    total = typeof feed['$totalResults'] === 'number' ? feed['$totalResults'] : -1;
+                    total = typeof feed['__count'] === 'number' ? feed['__count'] : -1;
 
                 queryDeferred.total = total;
                 queryDeferred.resolve(items);
@@ -214,13 +233,11 @@ console.log(request);
                 deferred.reject(error);
             }
         },
-        _onRequestFailure: function(deferred, xhr, xhrOptions) {
-            var error = new Error('An error occurred requesting: ' + xhrOptions.url);
+        _onRequestFailure: function(deferred, xhr) {
+            var error = new Error(xhr.message);
 
             error.xhr = xhr;
             error.status = xhr.status;
-            error.aborted = false;
-            error.url = xhrOptions.url;
 
             deferred.reject(error);
         },
@@ -253,7 +270,7 @@ console.log(request);
             {
                 if (entry[prop] instanceof Date)
                 {
-                    entry[prop] = this.service.isJsonEnabled()
+                    entry[prop] = this.service.json
                         ? convert.toJsonStringFromDate(entry[prop])
                         : convert.toIsoStringFromDate(entry[prop]);
                 }
@@ -316,9 +333,8 @@ console.log(request);
                 version = putOptions.version || this.getVersion(object),
                 atom = !this.service.isJsonEnabled();
 
-            if (id) object['$key'] = id;
-            if (entity && atom) object['$name'] = entity;
-            if (version) object['$etag'] = version;
+            if (id) object['id'] = id;
+            if (version) object['__metadata'] = {'$etag': version};
 
             var handle = {},
                 deferred = new Deferred(lang.hitch(this, this._onCancel, handle)),
@@ -387,7 +403,7 @@ console.log(request);
 
             var method = this.executeQueryAs
                 ? request[this.executeQueryAs]
-                : request instanceof Sage.SData.Client.SDataResourcePropertyRequest
+                : request instanceof EntryRequest
                 ? request.readFeed
                 : request.read;
 
