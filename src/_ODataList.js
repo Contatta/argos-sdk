@@ -37,7 +37,7 @@ define('argos/_ODataList', [
          * @cfg {String}
          * The default order by expression for an OData request.
          */
-        queryOrderBy: null,
+        queryOrderby: null,
         /**
          * @cfg {String/Function}
          * The default where expression for an OData request.
@@ -62,17 +62,24 @@ define('argos/_ODataList', [
          * The default resource predicate for an OData request.
          */
         resourcePredicate: null,
-        keyProperty: '$key',
+        keyProperty: 'id',
         descriptorProperty: '$descriptor',
 
         //temp override while testing
         connectionName: 'crm-odin',
 
+        rowTemplate: new Simplate([
+            '<li data-action="activateEntry" class="{%: $.cls %}" data-key="{%= $.id %}" data-descriptor="{%: $$.formatDescriptor($) %}">',
+            '<button data-action="selectEntry" class="list-item-selector button">',
+            '<img src="{%= $$.icon || $$.selectIcon %}" class="icon" />',
+            '</button>',
+            '<div class="list-item-content">{%! $$.itemTemplate %}</div>',
+            '</li>'
+        ]),
+
         createStore: function() {
             return new OData({
                 service: this.getConnection(),
-                contractName: this.contractName,
-                dataSet: this.dataSet,
                 resourceKind: this.resourceKind,
                 resourceProperty: this.resourceProperty,
                 resourcePredicate: this.resourcePredicate,
@@ -80,7 +87,7 @@ define('argos/_ODataList', [
                 select: this.querySelect,
                 where: this.queryWhere,
                 queryArgs: this.queryArgs,
-                orderBy: this.queryOrderBy,
+                orderby: this.queryOrderby,
                 idProperty: this.keyProperty,
                 scope: this
             });
@@ -101,13 +108,23 @@ define('argos/_ODataList', [
             {
                 if (options.select) queryOptions.select = options.select;
                 if (options.expand) queryOptions.expand = options.expand;
-                if (options.orderBy) queryOptions.sort = options.orderBy;
+                if (options.orderby) queryOptions.sort = options.orderby;
                 if (options.contractName) queryOptions.contractName = options.contractName;
                 if (options.resourceKind) queryOptions.resourceKind = options.resourceKind;
                 if (options.resourceProperty) queryOptions.resourceProperty = options.resourceProperty;
                 if (options.resourcePredicate) queryOptions.resourcePredicate = options.resourcePredicate;
                 if (options.queryArgs) queryOptions.queryArgs = options.queryArgs;
             }
+        },
+        /**
+         * Individual views should override this function to return the proper descriptor for each row.
+         * Typically the related Detail view will use this value as the title text.
+         * @template
+         * @param {Object} entry Full OData entry
+         * @return {String} Text to be set as data-descriptor on each row
+         */
+        formatDescriptor: function(entry) {
+            return '';
         },
         formatSearchQuery: function(query) {
             return query;
