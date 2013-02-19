@@ -1,3 +1,6 @@
+/**
+ * @alternateClassName ODataRequest
+ */
 define('argos/OData/_Request', [
     'dojo/_base/declare',
     'dojo/_base/lang'
