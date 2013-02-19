@@ -548,7 +548,7 @@ define('argos/Detail', [
             /* a generator creates markup */
             if (typeof row['generator'] === 'function')
             {
-                var dynamicNode = row['generator'].call(this, row, value, item);
+                var dynamicNode = row['generator'].call(this, row, value, item, sectionNode);
                 if (dynamicNode) domConstruct.place(dynamicNode, sectionNode);
             }
             else
