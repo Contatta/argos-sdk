@@ -36,11 +36,10 @@ define('argos/Store/OData', [
     return declare('argos.Store.OData', null, {
         doDateConversion: false,
 
-        /* todo: is this the appropriate name for the expansion scope? */
         scope: null,
         where: null,
         select: null,
-        include: null,
+        expand: null,
         orderby: null,
         service: null,
         request: null,
@@ -48,11 +47,9 @@ define('argos/Store/OData', [
         queryArgs: null,
         entityName: null,
         contractName: null,
-        dataSet: null,
         resourceKind: null,
         resourceProperty: null,
         resourcePredicate: null,
-        applicationName: null,
         executeQueryAs: null,
         executeGetAs: null,
         pathSegments: null,
@@ -331,7 +328,7 @@ define('argos/Store/OData', [
             var id = putOptions.id || this.getIdentity(object),
                 entity = putOptions.entity || this.entityName,
                 version = putOptions.version || this.getVersion(object),
-                atom = !this.service.isJsonEnabled();
+                atom = !this.service.json;
 
             if (id) object['id'] = id;
             if (version) object['__metadata'] = {'$etag': version};
