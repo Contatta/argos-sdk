@@ -397,7 +397,7 @@ define('argos/List', [
          *      label               Text added below the icon
          */
         listActionItemTemplate: new Simplate([
-            '<button data-action="invokeActionItem" data-id="{%= $.actionIndex %}" aria-label="{%: $.title || $.id %}">',
+            '<button class="{%: $.cls %}" data-action="invokeActionItem" data-id="{%= $.actionIndex %}" aria-label="{%: $.title || $.id %}">',
             '<img src="{%= $.icon %}" alt="{%= $.id %}" />',
             '<label>{%: $.label %}</label>',
             '</button>'
