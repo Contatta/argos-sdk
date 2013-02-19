@@ -1,3 +1,7 @@
+/**
+ * @alternateClassName ODataCollectionRequest
+ * @requires ODataRequest
+ */
 define('argos/OData/CollectionRequest', [
     'dojo/_base/declare',
     './_Request'
