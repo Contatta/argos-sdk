@@ -1,3 +1,7 @@
+/**
+ * @alternateClassName ODataConnection
+ * @requires ODataUri
+ */
 define('argos/OData/Connection', [
     'dojo/_base/declare',
     'dojo/_base/json',
@@ -72,7 +76,7 @@ define('argos/OData/Connection', [
             if (this.json)
             {
                 headers['Content-Type'] = 'application/json';
-                headers['Accept'] = '*/*, application/json,*/*'
+                headers['Accept'] = 'application/json, */*'
             }
             else
             {
@@ -131,7 +135,6 @@ define('argos/OData/Connection', [
             );
         },
         processResponse: function(response) {
-            console.log(response);
             if (this.json)
                 return response.d;
             else
