@@ -1,3 +1,6 @@
+/**
+ * @alternateClassName ODataUri
+ */
 define('argos/OData/Uri', [
     'dojo/_base/declare',
     'dojo/_base/lang'
@@ -70,7 +73,6 @@ define('argos/OData/Uri', [
                 if (value) segment['text'] = value;
                 if (predicate) segment['predicate'] = predicate;
             }
-
             this.pathSegments[i] = lang.mixin({}, this.pathSegments[i], segment);
 
             return this;
@@ -91,6 +93,10 @@ define('argos/OData/Uri', [
         },
         setResourceKind: function(kind) {
             this.setPathSegment(this.resourceKindIndex, kind);
+            return this;
+        },
+        setResourceSelector: function(id) {
+            this.setPathSegment(this.resourceKindIndex, false, id);
             return this;
         },
         build: function(excludeQuery) {
