@@ -14,7 +14,8 @@ define([
                     password: 'test'
                 });
 
-                // base64 of Basic test:test
+                window.Base64 = window.Base64 || { encode: function() {} };
+                doh.spyOn(Base64, 'encode').andReturn('dGVzdDp0ZXN0AAAA');
 
                 doh.assertEqual('Basic dGVzdDp0ZXN0AAAA', connection.createBasicAuthToken());
             }
@@ -48,26 +49,13 @@ define([
                     'Authorization': 'TOKEN',
                     'X-Authorization': 'TOKEN',
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json,*/*'
+                    'Accept': 'application/json, */*'
                 };
 
                 var spy = doh.spyOn(connection, 'createBasicAuthToken').andReturn('TOKEN');
 
                 doh.assertEqual(expectedHeaders, connection.createHeadersForRequest());
                 doh.assertWasCalled(spy);
-            }
-        },
-        {
-            name: 'Can process JSON from string to object',
-            runTest: function() {
-                var foo = '{"foo":{"bar":"test"}}';
-                var expected = {
-                    foo: {
-                        bar: 'test'
-                    }
-                };
-
-                doh.assertEqual(expected, foo);
             }
         }
     ]);

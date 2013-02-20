@@ -8,6 +8,37 @@ define('argos/OData/Uri', [
     declare,
     lang
 ) {
+
+    // parseUri 1.2.2
+    // (c) Steven Levithan <stevenlevithan.com>
+    // MIT License
+    var parseUri = function(str, o) {
+        var	m   = o.parser[o.strictMode ? "strict" : "loose"].exec(str),
+            uri = {},
+            i   = 14;
+
+        while (i--) uri[o.key[i]] = m[i] || "";
+
+        uri[o.q.name] = {};
+        uri[o.key[12]].replace(o.q.parser, function ($0, $1, $2) {
+            if ($1) uri[o.q.name][$1] = $2;
+        });
+
+        return uri;
+    };
+    var parseUriOptions = {
+        strictMode: false,
+        key: ["source","scheme","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"],
+        q:   {
+            name:   "queryKey",
+            parser: /(?:^|&)([^&=]*)=?([^&]*)/g
+        },
+        parser: {
+            strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
+            loose:  /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
+        }
+    };
+
     return declare('argos.OData.Uri', [], {
         scheme: 'https',
         host: null,
@@ -26,8 +57,33 @@ define('argos/OData/Uri', [
             this.pathSegments = [];
 
             lang.mixin(this, urlOptions);
+            if (this.url)
+                this.parseUrl();
         },
+        parseUrl: function(url) {
+            var parsed = parseUri(url || this.url, parseUriOptions);
+            if (parsed)
+            {
+                if (parsed.scheme)
+                    this.setScheme(parsed.scheme);
+                if (parsed.host)
+                    this.setHost(parsed.host);
+                if (parsed.port)
+                    this.setPort(parsed.port);
+                if (parsed.file)
+                    this.setDocument(parsed.file);
 
+                if (parsed.directory)
+                {
+                    var trimmed = parsed.directory.replace(/^\/|\/$/g, ''),
+                        dirs = trimmed.split('/');
+                    if (dirs[0])
+                        this.setApi(dirs[0]);
+                    if (dirs[1])
+                        this.setVersion(dirs[1]);
+                }
+            }
+        },
         setScheme: function(value) {
             this.scheme = value;
             return this;

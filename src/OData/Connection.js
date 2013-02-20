@@ -32,8 +32,14 @@ define('argos/OData/Connection', [
         json: true,
 
         constructor: function(options) {
-            console.log(arguments);
             this.uri = new Uri(options);
+
+            if (typeof options.userName !== 'undefined')
+                this.setUserName(options.userName);
+            if (typeof options.password !== 'undefined')
+                this.setPassword(options.password);
+            if (typeof options.json !== 'undefined')
+                this.setJson(options.json);
         },
 
         /**
