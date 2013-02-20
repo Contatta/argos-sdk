@@ -1177,6 +1177,20 @@ h2 > .collapsed-indicator
     text-overflow: ellipsis;
     overflow: hidden;
 }
+div[data-field-type="valueOnly"] {
+    display: none;
+}
+.row-edit[data-field-type="valueOnly"] {
+    display: block;
+    padding-bottom: 15px;
+}
+.row-edit[data-field-type="valueOnly"] label {
+    white-space: nowrap;
+    overflow: visible;
+}
+.row-edit[data-field-type="valueOnly"][class*=" icon-"] > label {
+    margin-left: 20px;
+}
 
 .text-input {
     padding:  8px 34px 8px 110px !important;

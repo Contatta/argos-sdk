@@ -49,7 +49,8 @@ define('argos/Fields/ValueOnlyField', [
          *
          */
         rowTemplate: new Simplate([
-            '<div style="display: none;" data-field="{%= $.name || $.property %}" data-field-type="{%= $.type %}">',
+            '<div{% if (false !== $.label) { %} class="row row-edit {%= $.cls %}"{% } %} data-field="{%= $.name || $.property %}" data-field-type="{%= $.type %}">',
+            '{% if (false !== $.label) { %}<label for="{%= $.name %}">{%: $.label %}</label>{% } %}',
             '</div>'
         ]),
 
