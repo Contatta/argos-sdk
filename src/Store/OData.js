@@ -48,7 +48,6 @@ define('argos/Store/OData', [
         entityName: null,
         contractName: null,
         resourceKind: null,
-        resourceProperty: null,
         resourcePredicate: null,
         executeQueryAs: null,
         executeGetAs: null,
@@ -73,31 +72,20 @@ define('argos/Store/OData', [
                 id = id || utility.expand(this.scope || this, getOptions.resourcePredicate || this.resourcePredicate);
 
                 var resourceKind = utility.expand(this.scope || this, getOptions.resourceKind || this.resourceKind),
-                    resourceProperty = utility.expand(this.scope || this, getOptions.resourceProperty || this.resourceProperty),
                     resourcePredicate = /\s+/.test(id) ? id : (id) ? string.substitute("id=${0}", [id]) : null,
                     queryArgs = utility.expand(this.scope || this, getOptions.queryArgs || this.queryArgs),
                     pathSegments = utility.expand(this.scope || this, getOptions.pathSegments || this.pathSegments);
 
-                if (resourceProperty)
-                {
-                    //todo implement
-                }
-                else
-                {
-                    request = new EntryRequest(this.service);
-                    request.uri.setResourceSelector(resourcePredicate);
-                }
+                request = new EntryRequest(this.service);
 
                 if (resourceKind)
                     request.uri.setResourceKind(resourceKind);
-
-                if (queryArgs)
-                    for (var arg in queryArgs)
-                        request.uri.setQueryOption(arg, queryArgs[arg]);
-
+                if (resourcePredicate)
+                    request.uri.setResourcePredicate(resourceKind);
                 if (pathSegments)
-                    for (var i = 0; i < pathSegments.length; i++)
-                        request.uri.appendPathSegment(pathSegments[i]);
+                    request.uri.appendPathSegments(pathSegments);
+                if (queryArgs)
+                    request.uri.setQueryOptions(queryArgs, false);
             }
 
             var select = utility.expand(this.scope || this, getOptions.select || this.select),
@@ -119,39 +107,25 @@ define('argos/Store/OData', [
             }
             else
             {
-                var queryName = utility.expand(this.scope || this, queryOptions.queryName || this.queryName),
-                    resourceKind = utility.expand(this.scope || this, queryOptions.resourceKind || this.resourceKind),
-                    resourceProperty = utility.expand(this.scope || this, queryOptions.resourceProperty || this.resourceProperty),
+                var resourceKind = utility.expand(this.scope || this, queryOptions.resourceKind || this.resourceKind),
                     resourcePredicate = utility.expand(this.scope || this, queryOptions.resourcePredicate || this.resourcePredicate),
                     queryArgs = utility.expand(this.scope || this, queryOptions.queryArgs || this.queryArgs),
                     pathSegments = utility.expand(this.scope || this, queryOptions.pathSegments || this.pathSegments);
 
-
-                if (queryName)
-                {
-                    //todo: implement
-                }
-                else if (resourceProperty)
-                {
-                    //todo: implement
-                }
-                else
-                {
-                    request = new CollectionRequest(this.service);
-                }
+                request = new CollectionRequest(this.service);
 
                 if (resourceKind)
                     request.uri.setResourceKind(resourceKind);
-                if (queryArgs)
-                    for (var arg in queryArgs)
-                        request.uri.setQueryOption(arg, queryArgs[arg]);
+                if (resourcePredicate)
+                    request.uri.setResourcePredicate(resourceKind);
                 if (pathSegments)
-                    for (var i = 0; i < pathSegments.length; i++)
-                        request.uri.appendPathSegment(pathSegments[i]);
+                    request.uri.appendPathSegments(pathSegments);
+                if (queryArgs)
+                    request.uri.setQueryOptions(queryArgs, false);
             }
 
             var select = utility.expand(this.scope || this, queryOptions.select || this.select),
-                include = utility.expand(this.scope || this, queryOptions.include || this.include),
+                expand = utility.expand(this.scope || this, queryOptions.expand || this.expand),
                 orderby = utility.expand(this.scope || this, queryOptions.sort || this.orderby);
 
             var requestUri = request.uri;
@@ -164,8 +138,8 @@ define('argos/Store/OData', [
                 requestUri.setQueryOption('$select', select.join(','));
             }
 
-            if (include && include.length > 0)
-                requestUri.setQueryOption('$expand', include.join(','));
+            if (expand && expand.length > 0)
+                requestUri.setQueryOption('$expand', expand.join(','));
 
             if (orderby)
             {

@@ -111,7 +111,7 @@ define('argos/OData/Connection', [
             };
 
             var o = lang.mixin({
-                url: req.uri.build(),
+                url: req.uri.constructUrl(),
                 sync: options.sync || false,
                 method: 'GET',
                 data: {},
@@ -174,7 +174,7 @@ define('argos/OData/Connection', [
             if (this.batchScope)
             {
                 this.batchScope.add( {
-                    url: request.build(),
+                    url: request.constructUrl(),
                     method: 'GET'
                 });
                 return;
@@ -188,8 +188,8 @@ define('argos/OData/Connection', [
             {
                 xhrOptions.headers['X-HTTP-Method-Override'] = 'GET';
                 xhrOptions.method = 'POST';
-                xhrOptions.data = request.build();
-                xhrOptions.url = request.build(true); // exclude query
+                xhrOptions.data = request.constructUrl();
+                xhrOptions.url = request.constructUrl(true); // exclude query
             }
 
             this.executeRequest(request, options, xhrOptions);
@@ -198,7 +198,7 @@ define('argos/OData/Connection', [
             if (this.batchScope)
             {
                 this.batchScope.add( {
-                    url: request.build(),
+                    url: request.constructUrl(),
                     method: 'GET'
                 });
                 return;
@@ -212,7 +212,7 @@ define('argos/OData/Connection', [
             if (this.batchScope)
             {
                 this.batchScope.add( {
-                    url: request.build(),
+                    url: request.constructUrl(),
                     data: entry,
                     method: 'POST',
                     etag: this.extractETagFromEntry(entry)
@@ -232,7 +232,7 @@ define('argos/OData/Connection', [
             if (this.batchScope)
             {
                 this.batchScope.add( {
-                    url: request.build(),
+                    url: request.constructUrl(),
                     data: entry,
                     method: 'PUT',
                     etag: this.extractETagFromEntry(entry)
@@ -252,7 +252,7 @@ define('argos/OData/Connection', [
             if (this.batchScope)
             {
                 this.batchScope.add( {
-                    url: request.build(),
+                    url: request.constructUrl(),
                     method: 'DELETE',
                     etag: this.extractETagFromEntry(entry)
                 });
