@@ -81,7 +81,6 @@ define('argos/_ODataList', [
             return new OData({
                 service: this.getConnection(),
                 resourceKind: this.resourceKind,
-                resourceProperty: this.resourceProperty,
                 resourcePredicate: this.resourcePredicate,
                 expand: this.queryExpand,
                 select: this.querySelect,
@@ -109,9 +108,7 @@ define('argos/_ODataList', [
                 if (options.select) queryOptions.select = options.select;
                 if (options.expand) queryOptions.expand = options.expand;
                 if (options.orderby) queryOptions.sort = options.orderby;
-                if (options.contractName) queryOptions.contractName = options.contractName;
                 if (options.resourceKind) queryOptions.resourceKind = options.resourceKind;
-                if (options.resourceProperty) queryOptions.resourceProperty = options.resourceProperty;
                 if (options.resourcePredicate) queryOptions.resourcePredicate = options.resourcePredicate;
                 if (options.queryArgs) queryOptions.queryArgs = options.queryArgs;
             }

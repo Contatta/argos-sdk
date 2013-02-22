@@ -85,7 +85,7 @@ define('argos/Store/OData', [
             if (resourceKind)
                 requestUri.setResourceKind(resourceKind);
             if (resourcePredicate)
-                requestUri.setResourcePredicate(resourceKind);
+                requestUri.setResourcePredicate(resourcePredicate);
             if (pathSegments)
                 requestUri.appendPathSegments(pathSegments);
             if (queryArgs)
@@ -370,8 +370,6 @@ define('argos/Store/OData', [
 
             var method = this.executeQueryAs
                 ? request[this.executeQueryAs]
-                : request instanceof EntryRequest
-                ? request.readFeed
                 : request.read;
 
             handle.value = method.call(request, {

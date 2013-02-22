@@ -277,7 +277,7 @@ define('argos/OData/Connection', [
          * @param {Object} options Options the read was executed with, if they include `httpMethodOverride` then it modifies
          * the xhr options greatly.
          */
-        readConnection: function(req, options) {
+        readCollection: function(req, options) {
             var xhrOptions = {
                 headers: {}
             };
@@ -290,80 +290,80 @@ define('argos/OData/Connection', [
                 xhrOptions.url = req.getUri().constructUrl(true); // exclude query
             }
 
-            this.executeRequest(request, options, xhrOptions);
+            this.executeRequest(req, options, xhrOptions);
         },
 
         /**
          * Executes the GET single resource request
-         * @param {ODataRequest} request The _Request instance to run
+         * @param {ODataRequest} req The _Request instance to run
          * @param {Object} options Options defined by the user when initiating the request
          */
-        readEntry: function(request, options) {
+        readEntry: function(req, options) {
             var xhrOptions = {};
 
-            this.executeRequest(request, options, xhrOptions);
+            this.executeRequest(req, options, xhrOptions);
         },
 
         /**
          * Executes the POST single resource request
-         * @param {ODataRequest} request The _Request instance to run
+         * @param {ODataRequest} req The _Request instance to run
          * @param {Object} entry The POST body to be stringified and transmitted, should contain etag
          * @param {Object} options Options defined by the user when initiating the request
          */
-        createEntry: function(request, entry, options) {
+        createEntry: function(req, entry, options) {
             var xhrOptions = {
                 method: 'POST',
                 etag: this.extractETagFromEntry(entry),
                 data: this.prepareEntry(entry)
             };
 
-            this.executeRequest(request, options, xhrOptions);
+            this.executeRequest(req, options, xhrOptions);
         },
 
         /**
          * Executes the PUT single resource request with the given entry
-         * @param {ODataRequest} request The _Request instance to run
+         * @param {ODataRequest} req The _Request instance to run
          * @param {Object} entry The PUT body to be stringified and transmitted, should contain etag
          * @param {Object} options Options defined by the user when initiating the request
          */
-        updateEntry: function(request, entry, options) {
+        updateEntry: function(req, entry, options) {
             var xhrOptions = {
                 method: 'PUT',
                 etag: this.extractETagFromEntry(entry),
                 data: this.prepareEntry(entry)
             };
 
-            this.executeRequest(request, options, xhrOptions);
+            this.executeRequest(req, options, xhrOptions);
         },
 
         /**
          * Executes the DELETE single resource request with the given entry
-         * @param {ODataRequest} request The _Request instance to run
+         * @param {ODataRequest} req The _Request instance to run
          * @param {Object} entry The entry should contain etag, as that's the only thing sent
          * @param {Object} options Options defined by the user when initiating the request
          */
-        deleteEntry: function(request, entry, options) {
+        deleteEntry: function(req, entry, options) {
             var xhrOptions = {
                 method: 'DELETE',
                 etag: this.extractETagFromEntry(entry)
             };
 
-            this.executeRequest(request, options, xhrOptions);
+            this.executeRequest(req, options, xhrOptions);
         },
 
         /**
          * Executes the POST single resource request, but does not include etag
-         * @param {ODataRequest} request The _Request instance to run
+         * @param {ODataRequest} req The _Request instance to run
          * @param {Object} entry The POST body to be stringified and transmitted
          * @param {Object} options Options defined by the user when initiating the request
          */
-        executeServiceOperation: function(request, entry, options) {
+        executeServiceOperation: function(req, entry, options) {
             var xhrOptions = {
                 method: 'POST',
                 data: this.prepareEntry(entry)
             };
 
-            this.executeRequest(request, options, xhrOptions);
+            this.executeRequest(req, options, xhrOptions);
         }
     });
 });

@@ -11,7 +11,7 @@ define('argos/OData/CollectionRequest', [
 ){
     return declare('argos.OData.CollectionRequest', [_Request], {
         read: function(options) {
-            return this.connection.readConnection(this, options);
+            return this.connection.readCollection(this, options);
         }
     });
 });
