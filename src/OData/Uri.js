@@ -1,4 +1,6 @@
 /**
+ * The ODataUri object is used in conjunction with ODataConnection and ODataRequest, it is the URL manager for
+ * building and maintaining the various pieces that make up the full uri to a resource.
  * @alternateClassName ODataUri
  */
 define('argos/OData/Uri', [
@@ -40,18 +42,74 @@ define('argos/OData/Uri', [
     };
 
     return declare('argos.OData.Uri', [], {
+        /**
+         * {String} The front of the url: `http`, `https`
+         */
         scheme: 'https',
+
+        /**
+         * {String} Domain/subdomain: `example.com`, `my.site.net`
+         */
         host: null,
+
+        /**
+         * {Number} Optional. If provided will be appended to host, `example.com:4040`
+         */
         port: null,
+
+        /**
+         * {String} The first directory, in odata this is the api and is often just `ap`.
+         */
         api: 'api',
+
+        /**
+         * {Number|String} Second directory this translates to the what version of the api it is using, `api/1`, `api/5`
+         */
         version: null,
+
+        /**
+         * {String} Third and last root directory, describes what odata doc, typically `odata.svc`
+         */
         document: null,
 
+        /**
+         * {Object} Object map of key/values that will be set as the url parameters after the `?`.
+         *
+         *     uri.queryOptions = { foo: 'bar', test: 'pass'};
+         *     // gets constructed as ?foo=bar&test=pass
+         *
+         */
         queryOptions: null,
+
+        /**
+         * {Object[]} Array of path segment objects. A path segment has up to two parts:
+         *
+         * * Just Text
+         *
+         *     var segment = { text: 'foo' };
+         *     // will be set as /foo
+         *
+         * * Text and Predicate
+         *
+         *     var segment = { text: 'foo', predicate: 'id=bar' };
+         *     // will be set as /foo(id=bar)
+         *
+         * Note that path segments will be constructed in the order they appear in the array. The one notable
+         * exception/warning is that setting resourceKind/resourcePredicate will always override index 0.
+         *
+         */
         pathSegments: null,
 
+        /**
+         * {Number} Index that resourceKind/resourcePredicate overwrite within the `pathSegments` array.
+         */
         resourceKindIndex: 0,
 
+        /**
+         * Extends constructor to not only mixin passed options but if `options.url` is passed it will be
+         * split apart, parsed and applied to the Uri.
+         * @param {Object} urlOptions
+         */
         constructor: function(urlOptions) {
             this.queryOptions = {};
             this.pathSegments = [];
@@ -60,6 +118,7 @@ define('argos/OData/Uri', [
             if (this.url)
                 this.parseUrl();
         },
+
         /**
          * Takes a string url (or uses this.url) and splits it up into the respective pieces and
          * sets them on the Uri: port, schema, version, host, etc
@@ -89,30 +148,37 @@ define('argos/OData/Uri', [
                 }
             }
         },
+
         setScheme: function(value) {
             this.scheme = value;
             return this;
         },
+
         setHost: function(value) {
             this.host = value;
             return this;
         },
+
         setPort: function(value) {
             this.port = parseInt(value, 10);
             return this;
         },
+
         setApi: function(value) {
             this.api = value;
             return this;
         },
+
         setVersion: function(value) {
             this.version = value;
             return this;
         },
+
         setDocument: function(value) {
             this.document = value;
             return this;
         },
+
         /**
          * Sets a specific query parameter `?key=value&key=value` in the queryOptions object. Note that
          * each param/key must be unique or it will override the previous value.
@@ -137,6 +203,7 @@ define('argos/OData/Uri', [
             this.queryOptions[key] = value;
             return this;
         },
+
         /**
          * Similar to `setQueryOption` but takes an entire object of key/value pairs to be merged in or replace the
          * existing query options.
@@ -149,6 +216,7 @@ define('argos/OData/Uri', [
             this.queryOptions = replace ? values : lang.mixin(this.queryOptions, values);
             return this;
         },
+
         /**
          * Directly replaces the path segments with the provided array of segment objects (contains keys text/predicate)
          * @chainable
@@ -158,6 +226,7 @@ define('argos/OData/Uri', [
             this.pathSegments = values;
             return this;
         },
+
         /**
          * Sets a single path segment directly given an index.
          *
@@ -183,6 +252,7 @@ define('argos/OData/Uri', [
 
             return this;
         },
+
         /**
          * Removes a given path segment by index. Path segments start after the base url and end before the `?`.
          * @chainable
@@ -194,6 +264,7 @@ define('argos/OData/Uri', [
 
             return this;
         },
+
         /**
          * Adds a path segment after the base URL and before the ? (see setQueryOption for after ?).
          *
@@ -243,6 +314,7 @@ define('argos/OData/Uri', [
                 this.setPathSegment(i + index, value[i]);
             }
         },
+
         /**
          * Similar to `appendPathSegment` except that this takes an array of path segment objects:
          *
@@ -264,6 +336,7 @@ define('argos/OData/Uri', [
                 this.setPathSegment(i + index, segments[i]);
             }
         },
+
         /**
          * Returns the segment at the given index, note that path segments are after the root URL and before the ?.
          * @param i
@@ -272,6 +345,7 @@ define('argos/OData/Uri', [
         getPathSegment: function(i) {
             return this.pathSegments[i] || false;
         },
+
         /**
          * Sets the resource kind, which is always the first path segment after the base url.
          *
@@ -289,6 +363,7 @@ define('argos/OData/Uri', [
             this.setPathSegment(this.resourceKindIndex, kind);
             return this;
         },
+
         /**
          * Sets the resource kinds' predicate, since the resource kind is always the first path segment after the base
          * url this will modify that to have the `/resourceKind(id)`.
@@ -312,6 +387,7 @@ define('argos/OData/Uri', [
             this.setPathSegment(this.resourceKindIndex, false, id);
             return this;
         },
+
         /**
          * Constructs the URL, piecing together the:
          *
@@ -332,6 +408,7 @@ define('argos/OData/Uri', [
 
             return (excludeQuery) ? base : base + queryOptions;
         },
+
         /**
          * Constructs the service root portion of the URL which is everything up to the OData document:
          *
@@ -355,6 +432,7 @@ define('argos/OData/Uri', [
 
             return url.join('/');
         },
+
         /**
          * Constructs the path segments, the in-between bits after the service root but before the query options/params.
          *
@@ -391,6 +469,7 @@ define('argos/OData/Uri', [
             }
             return url.join('/');
         },
+
         /**
          * Constructs the query options or the params part of the url
          *
